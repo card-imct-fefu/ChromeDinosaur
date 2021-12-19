@@ -124,7 +124,6 @@ class Student:
 
     def update(self):
         self.rect.move_ip(-game_speed, 0)
-        print(self.rect.x, self.rect.y)
         if self.rect.x < -self.rect.width:
             obstacles.pop()
 
@@ -153,7 +152,7 @@ def main():
         if x_pos_bg <= -image_width:
             SCREEN.blit(BACKGROUND, (image_width + x_pos_bg, y_pos_bg))
             x_pos_bg = 0
-        x_pos_bg -= game_speed
+        x_pos_bg -= game_speed * 0.6
 
     while run:
         for event in pygame.event.get():
@@ -178,7 +177,7 @@ def main():
 
         player.draw(SCREEN)
         player.update(user_input, joystick)
-        clock.tick(120)
+        clock.tick(60)
         pygame.display.update()
 
 
