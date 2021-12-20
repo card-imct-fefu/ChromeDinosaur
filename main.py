@@ -1,11 +1,13 @@
-import os
 import json
+import os
 import random
+import time
 
 import pygame
 
 pygame.init()
 pygame.joystick.init()
+random.seed(int(time.time()))
 
 try:
     joystick = pygame.joystick.Joystick(0)
@@ -23,7 +25,13 @@ SCREEN = pygame.display.set_mode(
 def load_image(file_name, width=None, height=None):
     image = pygame.image.load(os.path.join("Assets", file_name))
     if not width and not height:
-        return pygame.transform.scale(image, (image.get_width() // 2, image.get_height() // 2))
+        return pygame.transform.scale(image, (
+            image.get_width() // 2, image.get_height() // 2))
+    elif height and not width:
+        return pygame.transform.scale(image,
+                                      (
+                                      image.get_width() * height // image.get_height(),
+                                      height))
     return pygame.transform.scale(image, (width, height))
 
 
@@ -44,7 +52,11 @@ STUDENTS = [
     load_image("student_9.png"),
 ]
 
-BACKGROUND = load_image("background.png", SCREEN.get_width(), SCREEN.get_height())
+BACKGROUND = load_image("background.png",
+                        height=SCREEN.get_height())
+
+BACKGROUND_START = load_image("background_start.png",
+                        height=SCREEN.get_height())
 
 FONT = "Assets/Fifaks10Dev1.ttf"
 
@@ -65,7 +77,7 @@ class Klenin:
         self.dino_run = True
         self.dino_jump = False
 
-        self.BOUND_Y_POS = SCREEN.get_height() - self.run_img[0].get_height()
+        self.BOUND_Y_POS = SCREEN.get_height() - self.run_img[0].get_height() - 10
         self.BOUND_X_POS = 40
         self.JUMP_VEL = 14
 
@@ -88,7 +100,8 @@ class Klenin:
             self.image_index += 1
             self.image_index %= len(self.run_img)
 
-        if (user_input[pygame.K_UP] or (joystick and joystick.get_button(0))) and not self.dino_jump:
+        if (user_input[pygame.K_UP] or (
+                joystick and joystick.get_button(0))) and not self.dino_jump:
             self.dino_run = False
             self.dino_jump = True
         elif not (self.dino_jump or user_input[pygame.K_DOWN]):
@@ -120,7 +133,7 @@ class Student:
         self.number = number
         self.rect = self.image.get_rect()
         self.rect.x = SCREEN_WIDTH
-        self.rect.y = SCREEN.get_height() - self.image.get_height()
+        self.rect.y = SCREEN.get_height() - self.image.get_height() - 10
 
     def update(self):
         self.rect.move_ip(-game_speed, 0)
@@ -136,7 +149,7 @@ def main():
     run = True
     clock = pygame.time.Clock()
     player = Klenin()
-    game_speed = 13
+    game_speed = 15
     x_pos_bg = 0
     y_pos_bg = 0
     points = 0
@@ -155,6 +168,7 @@ def main():
         x_pos_bg -= game_speed * 0.6
 
     while run:
+        clock.tick(60)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -163,7 +177,8 @@ def main():
         user_input = pygame.key.get_pressed()
 
         if len(obstacles) == 0:
-            obstacles.append(Student(STUDENTS, random.randint(0, len(STUDENTS) - 1)))
+            obstacles.append(
+                Student(STUDENTS, random.randint(0, len(STUDENTS) - 1)))
 
         SCREEN.fill((0, 0, 0))
         background()
@@ -177,7 +192,6 @@ def main():
 
         player.draw(SCREEN)
         player.update(user_input, joystick)
-        clock.tick(60)
         pygame.display.update()
 
 
@@ -189,6 +203,7 @@ def menu(death_count):
 
     while run:
         SCREEN.fill((255, 255, 255))
+        SCREEN.blit(BACKGROUND_START, BACKGROUND_START.get_rect())
         font = pygame.font.Font(FONT, 30)
 
         if death_count == 0:
@@ -202,7 +217,9 @@ def menu(death_count):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            if event.type == pygame.KEYDOWN or (joystick and joystick.get_button(pygame.CONTROLLER_BUTTON_A)):
+            if event.type == pygame.KEYDOWN or (
+                    joystick and joystick.get_button(
+                pygame.CONTROLLER_BUTTON_A)):
                 main()
 
 
