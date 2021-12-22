@@ -20,6 +20,7 @@ SCREEN = pygame.display.set_mode(
     (SCREEN_WIDTH, SCREEN_HEIGHT),
     pygame.FULLSCREEN,
     vsync=True)
+CENTER_RECT = (SCREEN.get_width() // 2, SCREEN.get_height() // 2)
 
 
 def load_image(file_name, width=None, height=None):
@@ -30,8 +31,8 @@ def load_image(file_name, width=None, height=None):
     elif height and not width:
         return pygame.transform.scale(image,
                                       (
-                                      image.get_width() * height // image.get_height(),
-                                      height))
+                                          image.get_width() * height // image.get_height(),
+                                          height))
     return pygame.transform.scale(image, (width, height))
 
 
@@ -52,11 +53,14 @@ STUDENTS = [
     load_image("student_9.png"),
 ]
 
+COFFEE = load_image("coffee.png")
+
 BACKGROUND = load_image("background.png",
                         height=SCREEN.get_height())
 
 BACKGROUND_START = load_image("background_start.png",
-                        height=SCREEN.get_height())
+                              height=SCREEN.get_height())
+BACKGROUND_START.get_rect().center = CENTER_RECT
 
 FONT = "Assets/Fifaks10Dev1.ttf"
 
@@ -77,7 +81,8 @@ class Klenin:
         self.dino_run = True
         self.dino_jump = False
 
-        self.BOUND_Y_POS = SCREEN.get_height() - self.run_img[0].get_height() - 10
+        self.BOUND_Y_POS = SCREEN.get_height() - self.run_img[
+            0].get_height() - 10
         self.BOUND_X_POS = 40
         self.JUMP_VEL = 14
 
@@ -127,21 +132,27 @@ class Klenin:
         SCREEN.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
 
 
-class Student:
-    def __init__(self, image, number):
-        self.image = image[number]
-        self.number = number
+class Obstacle:
+    def __init__(self, image):
+        self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = SCREEN_WIDTH
         self.rect.y = SCREEN.get_height() - self.image.get_height() - 10
+        self.deleted = False
 
     def update(self):
         self.rect.move_ip(-game_speed, 0)
         if self.rect.x < -self.rect.width:
-            obstacles.pop()
+            self.deleted = True
 
     def draw(self, SCREEN):
         SCREEN.blit(self.image, self.rect)
+
+    def get_range_from_left_side_of_screen(self):
+        return SCREEN_WIDTH - self.rect.x
+
+    def is_deleted(self):
+        return self.deleted
 
 
 def main():
@@ -149,12 +160,14 @@ def main():
     run = True
     clock = pygame.time.Clock()
     player = Klenin()
+    score = 0
     game_speed = 15
     x_pos_bg = 0
     y_pos_bg = 0
     points = 0
-    font = pygame.font.Font(FONT, 20)
+    font_30 = pygame.font.Font(FONT, 30)
     obstacles = []
+    coffees = []
     death_count = 0
 
     def background():
@@ -173,25 +186,44 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        # SCREEN.fill((255, 255, 255))
         user_input = pygame.key.get_pressed()
 
         if len(obstacles) == 0:
             obstacles.append(
-                Student(STUDENTS, random.randint(0, len(STUDENTS) - 1)))
+                Obstacle(STUDENTS[random.randint(0, len(STUDENTS) - 1)]))
 
         SCREEN.fill((0, 0, 0))
         background()
+
+        score_text = font_30.render(f"Score: {score}", True, (0, 0, 0))
+        score_text_rect = score_text.get_rect()
+        score_text_rect.topright = (SCREEN.get_width() - 20, 20)
+
         for obstacle in obstacles:
             obstacle.draw(SCREEN)
             obstacle.update()
+            if obstacle.is_deleted():
+                obstacles.remove(obstacle)
+            value = random.randint(400, SCREEN.get_width() * 3 // 2)
+            if len(coffees) == 0 and obstacle.get_range_from_left_side_of_screen() >= value:
+                coffees.append(Obstacle(COFFEE))
             if player.dino_rect.colliderect(obstacle.rect):
                 pygame.time.delay(2000)
                 death_count += 1
                 menu(death_count)
 
+        for coffee in coffees:
+            coffee.draw(SCREEN)
+            coffee.update()
+            if player.dino_rect.colliderect(coffee.rect):
+                score += 1
+                coffees.remove(coffee)
+            if coffee.is_deleted():
+                coffees.remove(coffee)
+
         player.draw(SCREEN)
         player.update(user_input, joystick)
+        SCREEN.blit(score_text, score_text_rect)
         pygame.display.update()
 
 
@@ -211,7 +243,7 @@ def menu(death_count):
         elif death_count > 0:
             text = font.render(gameover_text, True, (0, 0, 0))
         text_rect = text.get_rect()
-        text_rect.center = (SCREEN.get_width() // 2, SCREEN.get_height() // 2)
+        text_rect.center = CENTER_RECT
         SCREEN.blit(text, text_rect)
         pygame.display.update()
         for event in pygame.event.get():
