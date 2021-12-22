@@ -182,6 +182,7 @@ def main():
 
     while run:
         clock.tick(60)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -218,6 +219,7 @@ def main():
             if player.dino_rect.colliderect(coffee.rect):
                 score += 1
                 coffees.remove(coffee)
+                game_speed += 1
             if coffee.is_deleted():
                 coffees.remove(coffee)
 
