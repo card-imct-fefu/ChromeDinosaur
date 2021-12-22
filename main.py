@@ -21,6 +21,8 @@ SCREEN = pygame.display.set_mode(
     pygame.FULLSCREEN,
     vsync=True)
 CENTER_RECT = (SCREEN.get_width() // 2, SCREEN.get_height() // 2)
+CENTER_RECT_1_8 = (SCREEN.get_width() // 2, SCREEN.get_height() // 8)
+best_record = 0
 
 
 def load_image(file_name, width=None, height=None):
@@ -63,6 +65,10 @@ BACKGROUND_START = load_image("background_start.png",
 BACKGROUND_START.get_rect().center = CENTER_RECT
 
 FONT = "Assets/Fifaks10Dev1.ttf"
+
+BACKGROUND_SOUND = pygame.mixer.Sound("Assets/background.mp3")
+DEATHSCREAN_SOUND = pygame.mixer.Sound("Assets/deathscream.wav")
+COIN_SOUND = pygame.mixer.Sound("Assets/coin.wav")
 
 with open('Assets/text.json') as f:
     TEXT = json.load(f)
@@ -156,7 +162,7 @@ class Obstacle:
 
 
 def main():
-    global game_speed, x_pos_bg, y_pos_bg, points, obstacles
+    global game_speed, x_pos_bg, y_pos_bg, points, obstacles, best_record
     run = True
     clock = pygame.time.Clock()
     player = Klenin()
@@ -169,6 +175,9 @@ def main():
     obstacles = []
     coffees = []
     death_count = 0
+    time_of_start_game = time.time()
+
+    BACKGROUND_SOUND.play()
 
     def background():
         global x_pos_bg, y_pos_bg
@@ -189,7 +198,7 @@ def main():
 
         user_input = pygame.key.get_pressed()
 
-        if len(obstacles) == 0:
+        if len(obstacles) == 0 and time.time() - time_of_start_game > 3:
             obstacles.append(
                 Obstacle(STUDENTS[random.randint(0, len(STUDENTS) - 1)]))
 
@@ -209,6 +218,9 @@ def main():
             if len(coffees) == 0 and obstacle.get_range_from_left_side_of_screen() >= value:
                 coffees.append(Obstacle(COFFEE))
             if player.dino_rect.colliderect(obstacle.rect):
+                BACKGROUND_SOUND.stop()
+                DEATHSCREAN_SOUND.play()
+                best_record = max(best_record, score)
                 pygame.time.delay(2000)
                 death_count += 1
                 menu(death_count)
@@ -217,6 +229,8 @@ def main():
             coffee.draw(SCREEN)
             coffee.update()
             if player.dino_rect.colliderect(coffee.rect):
+                COIN_SOUND.stop()
+                COIN_SOUND.play()
                 score += 1
                 coffees.remove(coffee)
                 game_speed += 1
@@ -240,14 +254,23 @@ def menu(death_count):
         SCREEN.blit(BACKGROUND_START, BACKGROUND_START.get_rect())
         font = pygame.font.Font(FONT, 30)
 
+        best_record_text = font.render(f"Best record: {best_record}",
+                                       True, (0, 0, 0)
+                                       )
+        best_record_text_rect = best_record_text.get_rect()
+        best_record_text_rect.center = CENTER_RECT_1_8
+
         if death_count == 0:
             text = font.render(start_text, True, (0, 0, 0))
         elif death_count > 0:
             text = font.render(gameover_text, True, (0, 0, 0))
+
         text_rect = text.get_rect()
         text_rect.center = CENTER_RECT
         SCREEN.blit(text, text_rect)
+        SCREEN.blit(best_record_text, best_record_text_rect)
         pygame.display.update()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
