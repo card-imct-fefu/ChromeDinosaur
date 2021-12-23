@@ -18,7 +18,7 @@ SCREEN_HEIGHT = 1080
 SCREEN_WIDTH = 1920
 SCREEN = pygame.display.set_mode(
     (SCREEN_WIDTH, SCREEN_HEIGHT),
-    pygame.FULLSCREEN,
+    pygame.NOFRAME,
     vsync=True)
 CENTER_RECT = (SCREEN.get_width() // 2, SCREEN.get_height() // 2)
 CENTER_RECT_1_8 = (SCREEN.get_width() // 2, SCREEN.get_height() // 8)
