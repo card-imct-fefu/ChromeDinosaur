@@ -228,6 +228,11 @@ def main():
                 DEATHSCREAN_SOUND.play()
                 best_record = max(best_record, score)
                 pygame.time.delay(2000)
+                if best_record < score:
+                    best_record = score
+                    SCREEN.blit(BACKGROUND_NEW_RECORD, BACKGROUND.get_rect())
+                    pygame.display.update()
+                    pygame.time.delay(2000)
                 death_count += 1
                 menu(death_count)
 
