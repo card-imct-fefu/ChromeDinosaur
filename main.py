@@ -226,7 +226,6 @@ def main():
             if player.dino_rect.colliderect(obstacle.rect):
                 BACKGROUND_SOUND.stop()
                 DEATHSCREAN_SOUND.play()
-                best_record = max(best_record, score)
                 pygame.time.delay(2000)
                 if best_record < score:
                     best_record = score
