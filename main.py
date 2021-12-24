@@ -66,6 +66,10 @@ BACKGROUND_START = load_image("background_start.png",
                               height=SCREEN.get_height())
 BACKGROUND_START.get_rect().center = CENTER_RECT
 
+BACKGROUND_NEW_RECORD = load_image("background_new_record.png",
+                                   height=SCREEN.get_height())
+BACKGROUND_NEW_RECORD.get_rect().center = CENTER_RECT
+
 FONT = "Assets/Fifaks10Dev1.ttf"
 
 BACKGROUND_SOUND = pygame.mixer.Sound("Assets/background.mp3")
