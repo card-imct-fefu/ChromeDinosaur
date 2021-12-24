@@ -26,7 +26,8 @@ best_record = 0
 
 
 def load_image(file_name, width=None, height=None):
-    image = pygame.image.load(os.path.join("Assets", file_name))
+    image = pygame.image.load(
+        os.path.join("Assets", "images", file_name))
     if not width and not height:
         return pygame.transform.scale(image, (
             image.get_width() // 2, image.get_height() // 2))
@@ -53,6 +54,7 @@ STUDENTS = [
     load_image("student_7.png"),
     load_image("student_8.png"),
     load_image("student_9.png"),
+    load_image("student_10.png"),
 ]
 
 COFFEE = load_image("coffee.png")
