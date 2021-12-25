@@ -106,11 +106,11 @@ class Klenin:
         self.dino_rect.y = self.BOUND_Y_POS
         self.dino_rect.x = self.BOUND_X_POS
 
-    def update(self, user_input, joystick):
+    def update(self, game_speed, user_input, joystick):
         if self.dino_run:
             self.run()
         if self.dino_jump:
-            self.jump()
+            self.jump(game_speed)
 
         if self.step_index >= 10:
             self.step_index = 0
@@ -132,10 +132,13 @@ class Klenin:
         self.dino_rect.y = self.BOUND_Y_POS
         self.step_index += 1
 
-    def jump(self):
+    def jump(self, game_speed):
         if self.dino_jump:
             self.dino_rect.y -= self.jump_vel * 3
-            self.jump_vel -= 0.4
+            if game_speed < 28:
+                self.jump_vel -= game_speed / 37.5
+            else:
+                self.jump_vel -= 28 / 37.5
         if self.jump_vel < - self.JUMP_VEL:
             self.dino_jump = False
             self.jump_vel = self.JUMP_VEL
@@ -243,12 +246,12 @@ def main():
                 COIN_SOUND.play()
                 score += 1
                 coffees.remove(coffee)
-                game_speed += 1
+                game_speed += 0.5
             if coffee.is_deleted():
                 coffees.remove(coffee)
 
         player.draw(SCREEN)
-        player.update(user_input, joystick)
+        player.update(game_speed, user_input, joystick)
         SCREEN.blit(score_text, score_text_rect)
         pygame.display.update()
 
